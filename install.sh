@@ -16,11 +16,12 @@ main() {
         return 1
     fi
 
-    # Symlink ncm to ~/.local/bin/, check if it's in $PATH
-    if [[ ! :$PATH: == *":$LOCAL_BIN:"* ]]; then
-        echo -e "${RED}Error: $LOCAL_BIN not in \$PATH${RESET}"
-        return 1
-    fi
+    # TODO: this doesn't work when using curl
+    # check if $LOCAL_BIN is in $PATH
+    # if [[ ! ":$PATH:" == *":$LOCAL_BIN:"* ]]; then
+    #     echo -e "${RED}Error: $LOCAL_BIN not in \$PATH${RESET}"
+    #     return 1
+    # fi
 
     # check if NCM_DIR already exists
     if [[ -d "$NCM_DIR" ]]; then
@@ -40,6 +41,7 @@ main() {
     git clone -b https://github.com/trimclain/ncm.git "$NCM_DIR" > /dev/null 2>&1
 
     rm -f "$LOCAL_BIN/ncm"
+    # Symlink ncm to ~/.local/bin/
     ln -s "$NCM_DIR/ncm" "$LOCAL_BIN/ncm"
 
     echo -e "${GREEN}Done${RESET}"
