@@ -4,7 +4,8 @@
 # Neovim Config Manager
 ###############################################################################
 
-CONFLIST="$HOME/.local/share/ncm/.nvim_configs"
+NCM_DIR="$HOME/.local/share/ncm"
+CONFLIST="$NCM_DIR/.nvim_configs"
 
 # Colors
 BLUE="\033[1;34m"
@@ -41,7 +42,8 @@ COMMANDS:
     a, add      Add new config
     u, use      Start neovim with a config
     d, del      Delete config
-    l, list     List installed configs"
+    l, list     List installed configs
+    update      Update ncm"
 }
 
 print_configs() {
@@ -100,7 +102,7 @@ delete_config() {
 
 # delete_config_list() {
 #     echo -n "Deleting the list... "
-#     rm -rf ~/.nvim_configs
+#     rm -rf $CONFLIST
 #     echo "Done"
 # }
 
@@ -125,6 +127,13 @@ use_config() {
     return 1
 }
 
+update_ncm() {
+    echo -e "${BLUE}Updating NCM...${RESET}"
+    git -C "$NCM_DIR" pull &> /dev/null
+    echo -e "${GREEN}Done${RESET}"
+    return 0
+}
+
 main() {
     if [ -n "$1" ]; then
 
@@ -142,6 +151,10 @@ main() {
 
         elif [[ $1 == "list" ]] || [[ $1 == "l" ]]; then
             print_configs
+
+        elif [[ $1 == "update" ]]; then
+            update_ncm
+
         else
             echo -e "${RED}Error: unknown command${RESET}"
         fi
