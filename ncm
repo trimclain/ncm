@@ -90,13 +90,19 @@ delete_config() {
     # Check if name already in the list
     if [[ -f $CONFLIST ]] && grep -q "$1" "$CONFLIST"; then
         echo -n "Deleting $1 from ~/.config/... "
+
         rm -rf "$HOME/.config/$1"
+        rm -rf "$HOME/.local/share/$1"
+        rm -rf "$HOME/.local/state/$1"
+        rm -rf "$HOME/.cache/$1"
+
         echo -e "${GREEN}Done${RESET}"
         echo -n "Deleting $1 from the list... "
         sed -i "/$1/d" "$CONFLIST"
         echo -e "${GREEN}Done${RESET}"
         return 0
     fi
+
     echo -e "${RED}Error: config $1 is not in the list${RESET}"
     return 1
 }
