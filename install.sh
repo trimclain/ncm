@@ -38,7 +38,7 @@ main() {
         echo -n -e "${BLUE}Installing NCM... ${RESET}"
     fi
 
-    git clone -b https://github.com/trimclain/ncm.git "$NCM_DIR" > /dev/null 2>&1
+    git clone https://github.com/trimclain/ncm.git "$NCM_DIR" > /dev/null 2>&1
 
     rm -f "$LOCAL_BIN/ncm"
     # Symlink ncm to ~/.local/bin/
