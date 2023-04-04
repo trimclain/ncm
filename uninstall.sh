@@ -17,7 +17,7 @@ main() {
     fi
 
     if [[ ! -d "$NCM_DIR" ]]; then
-        echo -e "${GREEN}NCM not found!${RESET}"
+        echo -e "${RED}Error: NCM not found!${RESET}"
         return 1
     fi
 
