@@ -129,7 +129,7 @@ use_config() {
         echo -e "${BLUE}List is empty${RESET}"
         return 1
     else
-        CHOSEN=$(fzf < "$CONFLIST")
+        CHOSEN=$(fzf --prompt "Use: " --height=25% --layout=reverse --border < "$CONFLIST")
         if [[ -n $CHOSEN ]]; then
             NVIM_APPNAME=$CHOSEN nvim
         fi
