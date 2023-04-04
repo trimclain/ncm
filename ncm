@@ -50,7 +50,7 @@ print_configs() {
     if ! list_exists; then
         echo -e "${BLUE}List not found${RESET}";
     elif list_empty; then
-        echo "List is empty"
+        echo -e "${BLUE}List is empty${RESET}"
     else
         echo -e "${BLUE}List of Configs:\n${RESET}"
         cat "$CONFLIST"
@@ -116,16 +116,19 @@ use_config() {
         return 0
     fi
 
-    if ! list_empty; then
+    if ! list_exists; then
+        echo -e "${BLUE}List not found${RESET}";
+        return 1
+    elif list_empty; then
+        echo -e "${BLUE}List is empty${RESET}"
+        return 1
+    else
         CHOSEN=$(fzf < "$CONFLIST")
         if [[ -n $CHOSEN ]]; then
             NVIM_APPNAME=$CHOSEN nvim
         fi
         return 0
     fi
-
-    echo -e "${RED}Error: unknown${RESET}"
-    return 1
 }
 
 update_ncm() {
