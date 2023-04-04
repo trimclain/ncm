@@ -29,7 +29,7 @@ list_exists() {
 # Determine if $CONFLIST is empty. Also return 0 if the list doesn't exist.
 list_empty() {
     if list_exists; then
-        [[ $(cat $CONFLIST | wc -l) -eq 0 ]] && return 0 || return 1
+        [[ $( wc -l < "$CONFLIST") -eq 0 ]] && return 0 || return 1
     fi
     return 0
 }
@@ -53,8 +53,9 @@ print_configs() {
         echo "List is empty"
     else
         echo -e "${BLUE}List of Configs:\n${RESET}"
-        cat $CONFLIST;
+        cat "$CONFLIST"
     fi
+    return 0
 }
 
 add_config() {
@@ -63,7 +64,7 @@ add_config() {
 
     CONFNAME=$(basename "$1")
     # Check if name already in the list
-    if [[ -f $CONFLIST ]] && cat $CONFLIST | grep -q "$CONFNAME"; then
+    if [[ -f $CONFLIST ]] && grep -q "$CONFNAME" "$CONFLIST"; then
         echo -e "${RED}Error: config $CONFNAME is already in the list${RESET}"
         return 1
     fi
@@ -77,7 +78,7 @@ add_config() {
 
     # Add to the list
     echo -n "Adding $CONFNAME to the list... "
-    echo "$CONFNAME" >> $CONFLIST
+    echo "$CONFNAME" >> "$CONFLIST"
     echo -e "${GREEN}Done${RESET}"
     return 0
 }
@@ -87,12 +88,12 @@ delete_config() {
     if ! list_exists; then echo -e "${RED}Error: list doesn't exist${RESET}" && return 1; fi
 
     # Check if name already in the list
-    if [[ -f $CONFLIST ]] && cat $CONFLIST | grep -q "$1"; then
+    if [[ -f $CONFLIST ]] && grep -q "$1" "$CONFLIST"; then
         echo -n "Deleting $1 from ~/.config/... "
         rm -r "$HOME/.config/$1"
         echo -e "${GREEN}Done${RESET}"
         echo -n "Deleting $1 from the list... "
-        sed -i "/$1/d" $CONFLIST
+        sed -i "/$1/d" "$CONFLIST"
         echo -e "${GREEN}Done${RESET}"
         return 0
     fi
@@ -116,7 +117,7 @@ use_config() {
     fi
 
     if ! list_empty; then
-        CHOSEN=$(cat $CONFLIST | fzf)
+        CHOSEN=$(fzf < "$CONFLIST")
         if [[ -n $CHOSEN ]]; then
             NVIM_APPNAME=$CHOSEN nvim
         fi
