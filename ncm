@@ -90,7 +90,7 @@ delete_config() {
     # Check if name already in the list
     if [[ -f $CONFLIST ]] && grep -q "$1" "$CONFLIST"; then
         echo -n "Deleting $1 from ~/.config/... "
-        rm -r "$HOME/.config/$1"
+        rm -rf "$HOME/.config/$1"
         echo -e "${GREEN}Done${RESET}"
         echo -n "Deleting $1 from the list... "
         sed -i "/$1/d" "$CONFLIST"
