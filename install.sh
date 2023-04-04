@@ -8,11 +8,17 @@ main() {
     local RESET="\033[0m"
 
     local NCM_DIR="$HOME/.local/share/ncm"
-    local LOCAL_BIN=~/.local/bin/
+    local LOCAL_BIN="$HOME/.local/bin/"
 
     # don't allow any arguments for now
     if [[ -n $1 ]]; then
         echo -e "${RED}Error: unknown argument \"$1\"${RESET}"
+        return 1
+    fi
+
+    # Symlink ncm to ~/.local/bin/, check if it's in $PATH
+    if [[ ! :$PATH: == *":$LOCAL_BIN:"* ]]; then
+        echo -e "${RED}Error: $LOCAL_BIN not in \$PATH${RESET}"
         return 1
     fi
 
@@ -33,11 +39,6 @@ main() {
 
     git clone -b https://github.com/trimclain/ncm.git "$NCM_DIR" > /dev/null 2>&1
 
-    # Symlink ncm to ~/.local/bin/, check if it's in $PATH
-    if [[ ! :$PATH: == *":$LOCAL_BIN:"* ]]; then
-        echo -e "${RED}Error: $LOCAL_BIN not in \$PATH${RESET}"
-        return 1
-    fi
     rm -f "$LOCAL_BIN/ncm"
     ln -s "$NCM_DIR/ncm" "$LOCAL_BIN/ncm"
 

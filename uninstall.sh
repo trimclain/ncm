@@ -8,7 +8,7 @@ main() {
     local RESET="\033[0m"
 
     local NCM_DIR="$HOME/.local/share/ncm"
-    local LOCAL_BIN=~/.local/bin/
+    local LOCAL_BIN="$HOME/.local/bin/"
 
     # don't allow any arguments for now
     if [[ -n $1 ]]; then
