@@ -132,7 +132,7 @@ use_config() {
 }
 
 update_ncm() {
-    echo -e "${BLUE}Updating NCM...${RESET}"
+    echo -n -e "${BLUE}Updating NCM...${RESET}"
     git -C "$NCM_DIR" pull &> /dev/null
     echo -e "${GREEN}Done${RESET}"
     return 0
