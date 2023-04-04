@@ -21,7 +21,7 @@ main() {
         return 1
     fi
 
-    read -n1 -rp "Uninstall NCM? [y/N] " res
+    read -n1 -rp "Are you sure you want to uninstall NCM? [y/N] " res
     echo ""
     if [[ $res == "n" ]] || [[ $res == "N" ]]; then
         echo -e "${GREEN}Canceled!${RESET}"

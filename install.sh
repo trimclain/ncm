@@ -26,7 +26,7 @@ main() {
     # check if NCM_DIR already exists
     if [[ -d "$NCM_DIR" ]]; then
         echo -e "${GREEN}NCM is already installed in \"$NCM_DIR\"!${RESET}"
-        read -n1 -rp "Reinstall NCM? [y/N] " res
+        read -n1 -rp "Do you want to reinstall NCM? [y/N] " res
         echo ""
         if [[ $res == "n" ]] || [[ $res == "N" ]]; then
             echo -e "${GREEN}Skipped!${RESET}"
