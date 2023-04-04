@@ -1,0 +1,154 @@
+#!/usr/bin/env bash
+
+###############################################################################
+# Neovim Config Manager
+###############################################################################
+
+CONFLIST="$HOME/.local/share/ncm/.nvim_configs"
+
+# Colors
+BLUE="\033[1;34m"
+GREEN="\033[1;32m"
+RED="\e[1;31m"
+RESET="\033[0m"
+
+
+check_if_command_exists() {
+    if ! command -v "$1" > /dev/null; then
+        echo -e "${RED}Error: $1 not found${RESET}"
+        exit 1
+    fi
+}
+
+# Determine if $CONFLIST exists.
+list_exists() {
+    [[ -f $CONFLIST ]] && return 0 ||  return 1
+}
+
+# Determine if $CONFLIST is empty. Also return 0 if the list doesn't exist.
+list_empty() {
+    if list_exists; then
+        [[ $(cat $CONFLIST | wc -l) -eq 0 ]] && return 0 || return 1
+    fi
+    return 0
+}
+
+print_help() {
+    echo "Usage: ncm [command] [directory]
+
+COMMANDS:
+    h, help     Show this help message
+    a, add      Add new config
+    u, use      Start neovim with a config
+    d, del      Delete config
+    l, list     List installed configs"
+}
+
+print_configs() {
+    if ! list_exists; then
+        echo -e "${BLUE}List not found${RESET}";
+    elif list_empty; then
+        echo "List is empty"
+    else
+        echo -e "${BLUE}List of Configs:\n${RESET}"
+        cat $CONFLIST;
+    fi
+}
+
+add_config() {
+    [[ -z $1 ]] && echo -e "${RED}Error: No config given${RESET}" && return 1
+    [[ ! -d $1 ]] && echo -e "${RED}Error: $1 is not a directory${RESET}" && return 1
+
+    CONFNAME=$(basename "$1")
+    # Check if name already in the list
+    if [[ -f $CONFLIST ]] && cat $CONFLIST | grep -q "$CONFNAME"; then
+        echo -e "${RED}Error: config $CONFNAME is already in the list${RESET}"
+        return 1
+    fi
+
+    # Copy to ~/.config/ if not there
+    if [[ ! $1 == ~/.config/* ]] && ! command ls ~/.config/ | grep -q "$1"; then
+        echo -n "Copying $1 to ~/.config... "
+        cp -r "$1" ~/.config/
+        echo -e "${GREEN}Done${RESET}"
+    fi
+
+    # Add to the list
+    echo -n "Adding $CONFNAME to the list... "
+    echo "$CONFNAME" >> $CONFLIST
+    echo -e "${GREEN}Done${RESET}"
+    return 0
+}
+
+delete_config() {
+    [[ -z $1 ]] && echo -e "${RED}Error: No config given${RESET}" && return 1
+    if ! list_exists; then echo -e "${RED}Error: list doesn't exist${RESET}" && return 1; fi
+
+    # Check if name already in the list
+    if [[ -f $CONFLIST ]] && cat $CONFLIST | grep -q "$1"; then
+        echo -n "Deleting $1 from ~/.config/... "
+        rm -r "$HOME/.config/$1"
+        echo -e "${GREEN}Done${RESET}"
+        echo -n "Deleting $1 from the list... "
+        sed -i "/$1/d" $CONFLIST
+        echo -e "${GREEN}Done${RESET}"
+        return 0
+    fi
+    echo -e "${RED}Error: config $1 is not in the list${RESET}"
+    return 1
+}
+
+# delete_config_list() {
+#     echo -n "Deleting the list... "
+#     rm -rf ~/.nvim_configs
+#     echo "Done"
+# }
+
+use_config() {
+    check_if_command_exists nvim
+    check_if_command_exists fzf
+
+    if [[ -n $1 ]] && [[ -d ~/.config/$1 ]]; then
+        NVIM_APPNAME=$1 nvim
+        return 0
+    fi
+
+    if ! list_empty; then
+        CHOSEN=$(cat $CONFLIST | fzf)
+        if [[ -n $CHOSEN ]]; then
+            NVIM_APPNAME=$CHOSEN nvim
+        fi
+        return 0
+    fi
+
+    echo -e "${RED}Error: unknown${RESET}"
+    return 1
+}
+
+main() {
+    if [ -n "$1" ]; then
+
+        if [[ $1 == "help" ]] || [[ $1 == "h" ]]; then
+            print_help
+
+        elif [[ $1 == "add" ]] || [[ $1 == "a" ]]; then
+            add_config "$2"
+
+        elif [[ $1 == "del" ]] || [[ $1 == "d" ]]; then
+            delete_config "$2"
+
+        elif [[ $1 == "use" ]] || [[ $1 == "u" ]]; then
+            use_config "$2"
+
+        elif [[ $1 == "list" ]] || [[ $1 == "l" ]]; then
+            print_configs
+        else
+            echo -e "${RED}Error: unknown command${RESET}"
+        fi
+
+    else
+        use_config
+    fi
+}
+
+main "$@"
