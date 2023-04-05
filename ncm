@@ -71,13 +71,13 @@ add_config() {
 
     # Copy to ~/.config/ if not there
     if [[ ! $1 == ~/.config/* ]] && ! command ls ~/.config/ | grep -q "$1"; then
-        echo -n "Copying $1 to ~/.config... "
+        echo -n "Copying $1 to ~/.config/...   "
         cp -r "$1" ~/.config/
         echo -e "${GREEN}Done${RESET}"
     fi
 
     # Add to the list
-    echo -n "Adding $CONFNAME to the list... "
+    echo -n "Adding $CONFNAME to the list...      "
     echo "$CONFNAME" >> "$CONFLIST"
     echo -e "${GREEN}Done${RESET}"
     return 0
@@ -89,18 +89,28 @@ delete_config() {
 
     # Check if name already in the list
     if [[ -f $CONFLIST ]] && grep -q "$1" "$CONFLIST"; then
-        echo -n "Deleting $1 from ~/.config/... "
 
+        echo -n "Deleting ~/.config/$1...      "
         rm -rf "$HOME/.config/$1"
-        rm -rf "$HOME/.local/share/$1"
-        rm -rf "$HOME/.local/state/$1"
-        rm -rf "$HOME/.cache/$1"
-
         echo -e "${GREEN}Done${RESET}"
-        echo -n "Deleting $1 from the list... "
+
+        echo -n "Deleting ~/.local/share/$1... "
+        rm -rf "$HOME/.local/share/$1"
+        echo -e "${GREEN}Done${RESET}"
+
+        echo -n "Deleting ~/.local/state/$1... "
+        rm -rf "$HOME/.local/state/$1"
+        echo -e "${GREEN}Done${RESET}"
+
+        echo -n "Deleting ~/.cache/$1...       "
+        rm -rf "$HOME/.cache/$1"
+        echo -e "${GREEN}Done${RESET}"
+
+        echo -n "Deleting $1 from the list...  "
         sed -i "/$1/d" "$CONFLIST"
         echo -e "${GREEN}Done${RESET}"
         return 0
+
     fi
 
     echo -e "${RED}Error: config $1 is not in the list${RESET}"
