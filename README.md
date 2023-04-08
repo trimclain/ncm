@@ -1,6 +1,9 @@
 # Neovim Config Manager
 
-Run neovim using a different config folder with help of `$NVIM_APPNAME` from neovim 0.9.
+Run neovim using a different config without breaking your own.
+
+## Requirements
+- neovim 0.9
 
 ## Installation
 ```
