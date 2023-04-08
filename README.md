@@ -4,6 +4,7 @@ Run neovim using a different config without breaking your own.
 
 ## Requirements
 - neovim 0.9
+- `~/.local/bin/` should be in `$PATH`
 
 ## Installation
 ```
