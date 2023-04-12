@@ -42,7 +42,8 @@ COMMANDS:
     u, use      Start neovim with a config
     d, del      Delete config
     l, list     List installed configs
-    update      Update ncm"
+    update      Update ncm
+    update all  Update ncm and installed configs"
 }
 
 print_configs() {
@@ -150,6 +151,19 @@ update_ncm() {
     echo -n -e "${BLUE}Updating ncm... ${RESET}"
     git -C "$NCM_DIR" pull &> /dev/null
     echo -e "${GREEN}Done${RESET}"
+
+    # update configs if they are a git project
+    if [[ $1 == "all" ]]; then
+        while IFS="" read -r p || [ -n "$p" ]
+        do
+            CONFDIR="$HOME/.config/$p"
+            if git -C "$CONFDIR" rev-parse --is-inside-work-tree &> /dev/null; then
+                echo -n -e "${BLUE}Updating $p config... ${RESET}"
+                git -C "$CONFDIR" pull &> /dev/null
+                echo -e "${GREEN}Done${RESET}"
+            fi
+        done < "$CONFLIST"
+    fi
     return 0
 }
 
@@ -172,7 +186,7 @@ main() {
             print_configs
 
         elif [[ $1 == "update" ]]; then
-            update_ncm
+            update_ncm "$2"
 
         else
             echo -e "${RED}Error: unknown command${RESET}"

@@ -20,6 +20,7 @@ bash <(curl -s https://raw.githubusercontent.com/trimclain/ncm/main/install.sh)
 -   Use `ncm use [configname]` to launch neovim with chosen config. Or use `ncm` to choose a config from the list
 -   Use `ncm del [configname]` to delete an existing config from the list and from the system
 -   Use `ncm update` to update ncm
+-   Use `ncm update all` to update ncm and installed configs, that are a git repository
 
 ## Demo
 
