@@ -3,18 +3,30 @@
 Run neovim using a different config without breaking your own.
 
 ## Requirements
-- neovim 0.9
-- `~/.local/bin/` should be in `$PATH`
+
+-   nvim-0.9.0
+-   `~/.local/bin/` should be in `$PATH`
 
 ## Installation
+
 ```
 bash <(curl -s https://raw.githubusercontent.com/trimclain/ncm/main/install.sh)
 ```
 
+## How to use
+
+-   Run `ncm help` to see the help menu
+-   Use `ncm add [configname]` to add a config folder to ncm. The folder needs to be either in `$(pwd)` or in `~/.config/`
+-   Use `ncm use [configname]` to launch neovim with chosen config. Or use `ncm` to choose a config from the list
+-   Use `ncm del [configname]` to delete an existing config from the list and from the system
+-   Use `ncm update` to update ncm
+
 ## Demo
+
 https://user-images.githubusercontent.com/84108846/230238465-014f99d5-7c6e-4c00-a691-f4f870b83865.mp4
 
 ## Uninstall
+
 ```
 bash <(curl -s https://raw.githubusercontent.com/trimclain/ncm/main/uninstall.sh)
 ```
