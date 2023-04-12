@@ -13,7 +13,6 @@ GREEN="\033[1;32m"
 RED="\e[1;31m"
 RESET="\033[0m"
 
-
 check_if_command_exists() {
     if ! command -v "$1" > /dev/null; then
         echo -e "${RED}Error: $1 not found${RESET}"
@@ -35,7 +34,7 @@ list_empty() {
 }
 
 print_help() {
-    echo "Usage: ncm [command] [directory]
+    echo "Usage: ncm [command] [configname]
 
 COMMANDS:
     h, help     Show this help message
@@ -117,20 +116,9 @@ delete_config() {
     return 1
 }
 
-# delete_config_list() {
-#     echo -n "Deleting the list... "
-#     rm -rf $CONFLIST
-#     echo "Done"
-# }
-
 use_config() {
     check_if_command_exists nvim
     check_if_command_exists fzf
-
-    if [[ -n $1 ]] && [[ -d ~/.config/$1 ]]; then
-        NVIM_APPNAME=$1 nvim
-        return 0
-    fi
 
     if ! list_exists; then
         echo -e "${BLUE}List not found${RESET}";
@@ -138,6 +126,17 @@ use_config() {
     elif list_empty; then
         echo -e "${BLUE}List is empty${RESET}"
         return 1
+    fi
+
+    # check if $1 is in the list
+    if [[ -n $1 ]] && ! grep -q "$1" "$CONFLIST"; then
+        echo -e "${RED}Error: config $1 is not in the list${RESET}"
+        return 1
+    fi
+
+    if [[ -n $1 ]] && [[ -d ~/.config/$1 ]]; then
+        NVIM_APPNAME=$1 nvim
+        return 0
     else
         CHOSEN=$(fzf --prompt "Use: " --height=25% --layout=reverse --border < "$CONFLIST")
         if [[ -n $CHOSEN ]]; then
@@ -148,7 +147,7 @@ use_config() {
 }
 
 update_ncm() {
-    echo -n -e "${BLUE}Updating NCM... ${RESET}"
+    echo -n -e "${BLUE}Updating ncm... ${RESET}"
     git -C "$NCM_DIR" pull &> /dev/null
     echo -e "${GREEN}Done${RESET}"
     return 0
