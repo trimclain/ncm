@@ -31,3 +31,6 @@ https://user-images.githubusercontent.com/84108846/230238465-014f99d5-7c6e-4c00-
 ```
 bash <(curl -s https://raw.githubusercontent.com/trimclain/ncm/main/uninstall.sh)
 ```
+
+## Inspiration
+Great video by Elijah Manor - [link](https://www.youtube.com/watch?v=LkHjJlSgKZY)
