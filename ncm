@@ -139,7 +139,7 @@ use_config() {
         NVIM_APPNAME=$1 nvim
         return 0
     else
-        CHOSEN=$(fzf --prompt "Use: " --height=25% --layout=reverse --border < "$CONFLIST")
+        CHOSEN=$(fzf --cycle --bind 'tab:toggle-down,btab:toggle-up' --prompt "Use: " --height=25% --layout=reverse --border < "$CONFLIST")
         if [[ -n $CHOSEN ]]; then
             NVIM_APPNAME=$CHOSEN nvim
         fi
