@@ -4,8 +4,8 @@ Run neovim using a different config without breaking your own.
 
 ## Requirements
 
--   nvim-0.9.0
--   `~/.local/bin/` should be in `$PATH`
+- nvim-0.9.0
+- `~/.local/bin/` should be in `$PATH`
 
 ## Installation
 
@@ -15,12 +15,30 @@ bash <(curl -s https://raw.githubusercontent.com/trimclain/ncm/main/install.sh)
 
 ## How to use
 
--   Run `ncm help` to see the help menu
--   Use `ncm add [configname]` to add a config folder to ncm. The folder needs to be either in `$(pwd)` or in `~/.config/`
--   Use `ncm use [configname]` to launch neovim with chosen config. Or use `ncm` to choose a config from the list
--   Use `ncm del [configname]` to delete an existing config from the list and from the system
--   Use `ncm update` to update ncm
--   Use `ncm update all` to update ncm and installed configs, that are a git repository
+- Run `ncm help` to see the help menu
+- Use `ncm add [configname]` to add a config folder to ncm. The folder needs to be either in `$(pwd)` or in `~/.config/`
+- Use `ncm use [configname]` to launch neovim with chosen config. Or use `ncm` without arguments to choose a config from the list
+- Use `ncm del [configname]` to delete an existing config from the list and from the system
+- Use `ncm update` to update ncm
+- Use `ncm update all` to update ncm and installed configs, that are a git repository
+
+## Popular configs
+- AstroNvim
+```
+git clone --depth=1 https://github.com/AstroNvim/AstroNvim ~/.config/AstroNvim
+```
+- CosmicNvim
+```
+git clone --depth=1 https://github.com/CosmicNvim/CosmicNvim ~/.config/CosmicNvim
+```
+- LazyVim
+```
+git clone --depth=1 https://github.com/LazyVim/starter ~/.config/LazyVim
+```
+- NvChad
+```
+git clone --depth=1 https://github.com/NvChad/NvChad ~/.config/NvChad
+```
 
 ## Demo
 
