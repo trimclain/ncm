@@ -39,6 +39,9 @@ git clone --depth=1 https://github.com/LazyVim/starter ~/.config/LazyVim
 ```
 git clone --depth=1 https://github.com/NvChad/NvChad ~/.config/NvChad
 ```
+<!-- TODO: -->
+- SpaceVim
+- LunarVim
 
 ## Demo
 

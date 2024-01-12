@@ -13,10 +13,30 @@ GREEN="\033[1;32m"
 RED="\e[1;31m"
 RESET="\033[0m"
 
+pprint() {
+    printf "%b%b${RESET}\n" "$1" "$2" >&2
+}
+
+info() {
+    pprint "${BLUE}" "$1"
+}
+
+confirm() {
+    pprint "${GREEN}" "Done"
+}
+
+error() {
+    pprint "${RED}" "Error: $1"
+    exit 1
+}
+
+info "Neovim Config Manager"
+# confirm
+# error "Neovim Config Manager"
+
 check_if_command_exists() {
     if ! command -v "$1" > /dev/null; then
-        echo -e "${RED}Error: $1 not found${RESET}"
-        exit 1
+        error "$1 not found"
     fi
 }
 
@@ -48,73 +68,71 @@ COMMANDS:
 
 print_configs() {
     if ! list_exists; then
-        echo -e "${BLUE}List not found${RESET}";
+        info "List not found"
     elif list_empty; then
-        echo -e "${BLUE}List is empty${RESET}"
+        info "List is empty"
     else
-        echo -e "${BLUE}List of Configs:\n${RESET}"
+        info "List of configs:\n"
         cat "$CONFLIST"
     fi
     return 0
 }
 
 add_config() {
-    [[ -z $1 ]] && echo -e "${RED}Error: No config given${RESET}" && return 1
-    [[ ! -d $1 ]] && echo -e "${RED}Error: $1 is not a directory${RESET}" && return 1
+    [[ -z $1 ]] && error "No config given"
+    [[ ! -d $1 ]] && error "$1 is not a directory"
 
     CONFNAME=$(basename "$1")
     # Check if name already in the list
     if [[ -f $CONFLIST ]] && grep -q "$CONFNAME" "$CONFLIST"; then
-        echo -e "${RED}Error: config $CONFNAME is already in the list${RESET}"
-        return 1
+        error "config $CONFNAME is already in the list"
     fi
 
     # Copy to ~/.config/ if not there
     if [[ ! $1 == ~/.config/* ]] && ! command ls ~/.config/ | grep -q "$1"; then
         echo -n "Copying $1 to ~/.config/...   "
         cp -r "$1" ~/.config/
-        echo -e "${GREEN}Done${RESET}"
+        confirm
     fi
 
     # Add to the list
     echo -n "Adding $CONFNAME to the list...      "
     echo "$CONFNAME" >> "$CONFLIST"
-    echo -e "${GREEN}Done${RESET}"
+    confirm
     return 0
 }
 
 delete_config() {
-    [[ -z $1 ]] && echo -e "${RED}Error: No config given${RESET}" && return 1
-    if ! list_exists; then echo -e "${RED}Error: list doesn't exist${RESET}" && return 1; fi
+    [[ -z $1 ]] && error "no config given"
+    ! list_exists && error "list doesn't exist"
 
     # Check if name already in the list
     if [[ -f $CONFLIST ]] && grep -q "$1" "$CONFLIST"; then
 
         echo -n "Deleting ~/.config/$1...      "
         rm -rf "$HOME/.config/$1"
-        echo -e "${GREEN}Done${RESET}"
+        confirm
 
         echo -n "Deleting ~/.local/share/$1... "
         rm -rf "$HOME/.local/share/$1"
-        echo -e "${GREEN}Done${RESET}"
+        confirm
 
         echo -n "Deleting ~/.local/state/$1... "
         rm -rf "$HOME/.local/state/$1"
-        echo -e "${GREEN}Done${RESET}"
+        confirm
 
         echo -n "Deleting ~/.cache/$1...       "
         rm -rf "$HOME/.cache/$1"
-        echo -e "${GREEN}Done${RESET}"
+        confirm
 
         echo -n "Deleting $1 from the list...  "
         sed -i "/$1/d" "$CONFLIST"
-        echo -e "${GREEN}Done${RESET}"
+        confirm
         return 0
 
     fi
 
-    echo -e "${RED}Error: config $1 is not in the list${RESET}"
-    return 1
+    error "config $1 is not in the list"
 }
 
 use_config() {
@@ -122,17 +140,16 @@ use_config() {
     check_if_command_exists fzf
 
     if ! list_exists; then
-        echo -e "${BLUE}List not found${RESET}";
+        info "List not found"
         return 1
     elif list_empty; then
-        echo -e "${BLUE}List is empty${RESET}"
+        info "List is empty"
         return 1
     fi
 
     # check if $1 is in the list
     if [[ -n $1 ]] && ! grep -q "$1" "$CONFLIST"; then
-        echo -e "${RED}Error: config $1 is not in the list${RESET}"
-        return 1
+        error "config $1 is not in the list"
     fi
 
     if [[ -n $1 ]] && [[ -d ~/.config/$1 ]]; then
@@ -148,9 +165,10 @@ use_config() {
 }
 
 update_ncm() {
+    # TODO: am I sure about the coloring?
     echo -n -e "${BLUE}Updating ncm... ${RESET}"
     git -C "$NCM_DIR" pull &> /dev/null
-    echo -e "${GREEN}Done${RESET}"
+    confirm
 
     # update configs if they are a git project
     if [[ $1 == "all" ]]; then
@@ -160,7 +178,7 @@ update_ncm() {
             if git -C "$CONFDIR" rev-parse --is-inside-work-tree &> /dev/null; then
                 echo -n -e "${BLUE}Updating $p config... ${RESET}"
                 git -C "$CONFDIR" pull &> /dev/null
-                echo -e "${GREEN}Done${RESET}"
+                confirm
             fi
         done < "$CONFLIST"
     fi
@@ -189,7 +207,7 @@ main() {
             update_ncm "$2"
 
         else
-            echo -e "${RED}Error: unknown command${RESET}"
+            error "unknown command"
         fi
 
     else
@@ -197,4 +215,4 @@ main() {
     fi
 }
 
-main "$@"
+# main "$@"
