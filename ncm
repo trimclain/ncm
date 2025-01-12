@@ -22,13 +22,13 @@ check_if_command_exists() {
 
 # Determine if $CONFLIST exists.
 list_exists() {
-    [[ -f $CONFLIST ]] && return 0 ||  return 1
+    [[ -f $CONFLIST ]] && return 0 || return 1
 }
 
 # Determine if $CONFLIST is empty. Also return 0 if the list doesn't exist.
 list_empty() {
     if list_exists; then
-        [[ $( wc -l < "$CONFLIST") -eq 0 ]] && return 0 || return 1
+        [[ $(wc -l < "$CONFLIST") -eq 0 ]] && return 0 || return 1
     fi
     return 0
 }
@@ -48,7 +48,7 @@ COMMANDS:
 
 print_configs() {
     if ! list_exists; then
-        echo -e "${BLUE}List not found${RESET}";
+        echo -e "${BLUE}List not found${RESET}"
     elif list_empty; then
         echo -e "${BLUE}List is empty${RESET}"
     else
@@ -122,7 +122,7 @@ use_config() {
     check_if_command_exists fzf
 
     if ! list_exists; then
-        echo -e "${BLUE}List not found${RESET}";
+        echo -e "${BLUE}List not found${RESET}"
         return 1
     elif list_empty; then
         echo -e "${BLUE}List is empty${RESET}"
@@ -154,8 +154,7 @@ update_ncm() {
 
     # update configs if they are a git project
     if [[ $1 == "all" ]]; then
-        while IFS="" read -r p || [ -n "$p" ]
-        do
+        while IFS="" read -r p || [ -n "$p" ]; do
             CONFDIR="$HOME/.config/$p"
             if git -C "$CONFDIR" rev-parse --is-inside-work-tree &> /dev/null; then
                 echo -n -e "${BLUE}Updating $p config... ${RESET}"
