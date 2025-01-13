@@ -8,6 +8,7 @@ main() {
     local RESET="\033[0m"
 
     local NCM_DIR="$HOME/.local/share/ncm"
+    # TODO: allow to pass in a custom directory (in $PATH)
     local LOCAL_BIN="$HOME/.local/bin/"
 
     # don't allow any arguments for now
@@ -45,7 +46,6 @@ main() {
     ln -s "$NCM_DIR/ncm" "$LOCAL_BIN/ncm"
 
     echo -e "${GREEN}Done${RESET}"
-    return 0
 }
 
 main "$@"
