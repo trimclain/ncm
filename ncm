@@ -1,39 +1,50 @@
 #!/usr/bin/env bash
-
-###############################################################################
+#
 # Neovim Config Manager
-###############################################################################
+#
+# Author: @trimclain
+# License: MIT
 
-NCM_DIR="$HOME/.local/share/ncm"
-CONFLIST="$NCM_DIR/.nvim_configs"
+# shellcheck disable=SC2155,SC2164
+# Disabled:
+# "Declare and assign separately to avoid masking return values":
+#  https://www.shellcheck.net/wiki/SC2155
+# "Use 'pushd ... || exit' or 'pushd ... || exit' in case pushd fails":
+#  https://www.shellcheck.net/wiki/SC2164
 
-# Colors
-BLUE="\033[1;34m"
-GREEN="\033[1;32m"
-RED="\e[1;31m"
-RESET="\033[0m"
+readonly NCM_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/ncm"
+readonly CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
+readonly INSTALLED_CONFIGS_DB="$NCM_DIR/.nvim_configs"
 
-check_if_command_exists() {
+readonly BLUE="\033[1;34m"
+readonly GREEN="\033[1;32m"
+readonly RED="\e[1;31m"
+readonly RESET="\033[0m"
+
+info() {
+    printf "%b\n" "$1"
+}
+
+confirm() {
+    printf "${GREEN}%b${RESET}\n" "$1"
+}
+
+alert() {
+    printf "${RED}%b${RESET}\n" "$1"
+}
+
+error() {
+    alert "$1" >&2
+    return 1
+}
+
+ensure_installed() {
     if ! command -v "$1" > /dev/null; then
-        echo -e "${RED}Error: $1 not found${RESET}"
-        exit 1
+        error "Dependency $1 is not installed on your system."
     fi
 }
 
-# Determine if $CONFLIST exists.
-list_exists() {
-    [[ -f $CONFLIST ]] && return 0 || return 1
-}
-
-# Determine if $CONFLIST is empty. Also return 0 if the list doesn't exist.
-list_empty() {
-    if list_exists; then
-        [[ $(wc -l < "$CONFLIST") -eq 0 ]] && return 0 || return 1
-    fi
-    return 0
-}
-
-print_help() {
+display_help() {
     echo "Usage: ncm [command] [configname]
 
 COMMANDS:
@@ -47,130 +58,117 @@ COMMANDS:
 }
 
 print_configs() {
-    if ! list_exists; then
-        echo -e "${BLUE}List not found${RESET}"
-    elif list_empty; then
-        echo -e "${BLUE}List is empty${RESET}"
+    if [[ ! -s $INSTALLED_CONFIGS_DB ]]; then
+        info "Database is empty"
     else
-        echo -e "${BLUE}List of Configs:\n${RESET}"
-        cat "$CONFLIST"
+        info "Installed Neovim Configs:\n"
+        cat "$INSTALLED_CONFIGS_DB"
     fi
-    return 0
 }
 
 add_config() {
-    [[ -z $1 ]] && echo -e "${RED}Error: No config given${RESET}" && return 1
-    [[ ! -d $1 ]] && echo -e "${RED}Error: $1 is not a directory${RESET}" && return 1
+    [[ -z $1 ]] && error "No config given"
+    [[ -d $1 ]] || error "$1 is not a directory"
 
-    CONFNAME=$(basename "$1")
-    # Check if name already in the list
-    if [[ -f $CONFLIST ]] && grep -q "$CONFNAME" "$CONFLIST"; then
-        echo -e "${RED}Error: config $CONFNAME is already in the list${RESET}"
-        return 1
+    local confname=$(basename "$1")
+    if grep -qx "$confname" "$INSTALLED_CONFIGS_DB"; then
+        error "Config $confname is already in the database"
     fi
 
-    # Copy to ~/.config/ if not there
-    if [[ ! $1 == ~/.config/* ]] && ! command ls ~/.config/ | grep -q "$1"; then
+    # config needs to be in $CONFIG_DIR for $NVIM_APPNAME to work
+    if [[ ! -d "$CONFIG_DIR/$confname" ]]; then
         echo -n "Copying $1 to ~/.config/...   "
         cp -r "$1" ~/.config/
-        echo -e "${GREEN}Done${RESET}"
+        confirm "Done"
     fi
 
-    # Add to the list
-    echo -n "Adding $CONFNAME to the list...      "
-    echo "$CONFNAME" >> "$CONFLIST"
-    echo -e "${GREEN}Done${RESET}"
-    return 0
+    echo -n "Adding $confname to the database...      "
+    echo "$confname" >> "$INSTALLED_CONFIGS_DB"
+    confirm "Done"
 }
 
 delete_config() {
-    [[ -z $1 ]] && echo -e "${RED}Error: No config given${RESET}" && return 1
-    if ! list_exists; then echo -e "${RED}Error: list doesn't exist${RESET}" && return 1; fi
+    [[ -z $1 ]] && error "No config given" && return 1
 
-    # Check if name already in the list
-    if [[ -f $CONFLIST ]] && grep -q "$1" "$CONFLIST"; then
-
-        echo -n "Deleting ~/.config/$1...      "
-        rm -rf "$HOME/.config/$1"
-        echo -e "${GREEN}Done${RESET}"
-
-        echo -n "Deleting ~/.local/share/$1... "
-        rm -rf "$HOME/.local/share/$1"
-        echo -e "${GREEN}Done${RESET}"
-
-        echo -n "Deleting ~/.local/state/$1... "
-        rm -rf "$HOME/.local/state/$1"
-        echo -e "${GREEN}Done${RESET}"
-
-        echo -n "Deleting ~/.cache/$1...       "
-        rm -rf "$HOME/.cache/$1"
-        echo -e "${GREEN}Done${RESET}"
-
-        echo -n "Deleting $1 from the list...  "
-        sed -i "/$1/d" "$CONFLIST"
-        echo -e "${GREEN}Done${RESET}"
-        return 0
-
+    if ! grep -qx "$1" "$INSTALLED_CONFIGS_DB"; then
+        error "Config $1 is not in the database"
     fi
 
-    echo -e "${RED}Error: config $1 is not in the list${RESET}"
-    return 1
+    local data_paths=(
+        "$CONFIG_DIR/$1"
+        "${XDG_DATA_HOME:-$HOME/.local/share}/$1"
+        "${XDG_STATE_HOME:-$HOME/.local/state}/$1"
+        "${XDG_CACHE_HOME:-$HOME/.cache}/$1"
+    )
+    for dir in "${data_paths[@]}"; do
+        echo -n "Deleting $dir... "
+        rm -rf "$dir"
+        confirm "Done"
+    done
+
+    echo -n "Deleting $1 from the list... "
+    sed -i "/$1/d" "$INSTALLED_CONFIGS_DB"
+    confirm "Done"
 }
 
 use_config() {
-    check_if_command_exists nvim
-    check_if_command_exists fzf
+    ensure_installed nvim
+    ensure_installed fzf
 
-    if ! list_exists; then
-        echo -e "${BLUE}List not found${RESET}"
-        return 1
-    elif list_empty; then
-        echo -e "${BLUE}List is empty${RESET}"
-        return 1
+    if [[ ! -s $INSTALLED_CONFIGS_DB ]]; then
+        error "Neovim configs database is empty"
     fi
 
     # check if $1 is in the list
-    if [[ -n $1 ]] && ! grep -q "$1" "$CONFLIST"; then
-        echo -e "${RED}Error: config $1 is not in the list${RESET}"
-        return 1
+    if [[ -n $1 ]] && ! grep -qx "$1" "$INSTALLED_CONFIGS_DB"; then
+        error "config $1 is not in the database"
     fi
 
     if [[ -n $1 ]] && [[ -d ~/.config/$1 ]]; then
         NVIM_APPNAME=$1 nvim
-        return 0
     else
-        CHOSEN=$(fzf --cycle --bind 'tab:toggle-down,btab:toggle-up' --prompt "Use: " --height=25% --layout=reverse --border < "$CONFLIST")
-        if [[ -n $CHOSEN ]]; then
-            NVIM_APPNAME=$CHOSEN nvim
+        local chosen_config=$(
+            fzf \
+                --cycle \
+                --bind 'tab:toggle-down,btab:toggle-up' \
+                --prompt "Use: " \
+                --height=25% \
+                --layout=reverse \
+                --border \
+                < "$INSTALLED_CONFIGS_DB"
+        )
+        if [[ -n $chosen_config ]]; then
+            NVIM_APPNAME=$chosen_config nvim
         fi
-        return 0
     fi
 }
 
 update_ncm() {
     echo -n -e "${BLUE}Updating ncm... ${RESET}"
     git -C "$NCM_DIR" pull &> /dev/null
-    echo -e "${GREEN}Done${RESET}"
+    confirm "Done"
+}
 
-    # update configs if they are a git project
-    if [[ $1 == "all" ]]; then
-        while IFS="" read -r p || [ -n "$p" ]; do
-            CONFDIR="$HOME/.config/$p"
-            if git -C "$CONFDIR" rev-parse --is-inside-work-tree &> /dev/null; then
-                echo -n -e "${BLUE}Updating $p config... ${RESET}"
-                git -C "$CONFDIR" pull &> /dev/null
-                echo -e "${GREEN}Done${RESET}"
-            fi
-        done < "$CONFLIST"
-    fi
-    return 0
+update_installed_configs() {
+    # || part ensures the loop processes the last line,
+    # even if it doesn't end with a newline
+    while IFS="" read -r config_name || [ -n "$config_name" ]; do
+        local config_path="$HOME/.config/$config_name"
+        if git -C "$config_path" rev-parse --is-inside-work-tree &> /dev/null; then
+            echo -n -e "${BLUE}Updating $config_name config... ${RESET}"
+            git -C "$config_path" pull &> /dev/null
+            confirm "Done"
+        fi
+    done < "$INSTALLED_CONFIGS_DB"
 }
 
 main() {
+    [[ -f $INSTALLED_CONFIGS_DB ]] || touch "$INSTALLED_CONFIGS_DB"
+
     if [ -n "$1" ]; then
 
         if [[ $1 == "help" ]] || [[ $1 == "h" ]]; then
-            print_help
+            display_help
 
         elif [[ $1 == "add" ]] || [[ $1 == "a" ]]; then
             add_config "$2"
@@ -185,10 +183,13 @@ main() {
             print_configs
 
         elif [[ $1 == "update" ]]; then
-            update_ncm "$2"
+            update_ncm
+            if [[ $2 == "all" ]]; then
+                update_installed_configs
+            fi
 
         else
-            echo -e "${RED}Error: unknown command${RESET}"
+            error "unknown command"
         fi
 
     else
