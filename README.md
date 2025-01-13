@@ -1,48 +1,64 @@
 # Neovim Config Manager
 
-Run neovim using a different config without breaking your own.
+Run Neovim using a different config without modifying your own.
 
 ## Requirements
 
-- nvim-0.9.0
+- [Neovim v0.9.0](https://github.com/neovim/neovim/releases/tag/v0.9.0) or later
+- [fzf](https://github.com/junegunn/fzf)
 - `~/.local/bin/` should be in `$PATH`
 
 ## Installation
 
 ```
-bash <(curl -s https://raw.githubusercontent.com/trimclain/ncm/main/install.sh)
+curl -fsSL https://raw.githubusercontent.com/trimclain/ncm/main/install.sh | bash
 ```
 
-## How to use
+## Usage
 
-- Run `ncm help` to see the help menu
-- Use `ncm add [configname]` to add a config folder to ncm. The folder needs to be either in `$(pwd)` or in `~/.config/`
-- Use `ncm use [configname]` to launch neovim with chosen config. Or use `ncm` without arguments to choose a config from the list
-- Use `ncm del [configname]` to delete an existing config from the list and from the system
-- Use `ncm update` to update ncm
-- Use `ncm update all` to update ncm and installed configs, that are a git repository
+```
+ncm [OPTION]
+```
 
-## Popular configs
+There are several option available with NCM:
+
+| Option                                           | Description                                                         |
+| ------------------------------------------------ | ------------------------------------------------------------------- |
+| `h, help, --help`                                | Show the help message                                               |
+| `a, add <config>`                                | Add a config directory to NCM                                       |
+| `u, use`                                         | Choose a config to launch neovim with                               |
+| `u, use [config]`                                | Launch neovim with given config name                                |
+| `d, del, rm <config>`                            | Delete a config from NCM and delete all it's traces from the system |
+| `l, list, ls`                                    | List installed configs                                              |
+| `update`                                         | Update NCM                                                          |
+| `update all`                                     | Update NCM and all installed configs (only git repos with remote)   |
+| `version, -V`                                    | Print the current version of NCM                                    |
+
+
+## Popular Configs
+
 - AstroNvim
 ```
-git clone --depth=1 https://github.com/AstroNvim/AstroNvim ~/.config/AstroNvim
+git clone --depth=1 https://github.com/AstroNvim/AstroNvim ~/.config/AstroNvim && ncm add AstroNvim
 ```
 - CosmicNvim
 ```
-git clone --depth=1 https://github.com/CosmicNvim/CosmicNvim ~/.config/CosmicNvim
+git clone --depth=1 https://github.com/CosmicNvim/CosmicNvim ~/.config/CosmicNvim && ncm add CosmicNvim
 ```
 - LazyVim
 ```
-git clone --depth=1 https://github.com/LazyVim/starter ~/.config/LazyVim
+git clone --depth=1 https://github.com/LazyVim/starter ~/.config/LazyVim && ncm add LazyVim
 ```
 - NvChad
 ```
-git clone --depth=1 https://github.com/NvChad/NvChad ~/.config/NvChad
+git clone --depth=1 https://github.com/NvChad/NvChad ~/.config/NvChad && ncm add NvChad
 ```
+
 
 ## Demo
 
 https://user-images.githubusercontent.com/84108846/230238465-014f99d5-7c6e-4c00-a691-f4f870b83865.mp4
+
 
 ## Uninstall
 
@@ -51,4 +67,5 @@ bash <(curl -s https://raw.githubusercontent.com/trimclain/ncm/main/uninstall.sh
 ```
 
 ## Inspiration
-Great video by Elijah Manor - [link](https://www.youtube.com/watch?v=LkHjJlSgKZY)
+
+Great [video](https://www.youtube.com/watch?v=LkHjJlSgKZY) by Elijah Manor
