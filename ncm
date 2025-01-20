@@ -35,7 +35,7 @@ alert() {
 
 error() {
     alert "$1" >&2
-    return 1
+    exit 1
 }
 
 ensure_installed() {
@@ -87,13 +87,16 @@ add_config() {
     confirm "Done"
 }
 
-delete_config() {
-    [[ -z $1 ]] && error "No config given" && return 1
-
-    if ! grep -qx "$1" "$INSTALLED_CONFIGS_DB"; then
-        error "Config $1 is not in the database"
-    fi
-
+##################################################
+# Delete Neovim config with left-over directories
+# and remove it from the list
+# Globals:
+#   CONFIG_DIR
+#   INSTALLED_CONFIGS_DB
+# Arguments:
+#   $1: config name
+##################################################
+delete_nvim_config() {
     local data_paths=(
         "$CONFIG_DIR/$1"
         "${XDG_DATA_HOME:-$HOME/.local/share}/$1"
@@ -111,23 +114,30 @@ delete_config() {
     confirm "Done"
 }
 
-use_config() {
-    ensure_installed nvim
-    ensure_installed fzf
+##################################################
+# Run Neovim with given config
+# Arguments:
+#   $1: config name
+##################################################
+run_nvim_with_config() {
+    NVIM_APPNAME=$1 nvim
+}
 
+use_or_delete_config() {
     if [[ ! -s $INSTALLED_CONFIGS_DB ]]; then
         error "Neovim configs database is empty"
     fi
 
-    # check if $1 is in the list
     if [[ -n $1 ]] && ! grep -qx "$1" "$INSTALLED_CONFIGS_DB"; then
-        error "config $1 is not in the database"
+        error "Config $1 is not in the database"
     fi
 
+    local chosen_config
+    # if I trust my checks in add_config the second condition is not needed
     if [[ -n $1 ]] && [[ -d ~/.config/$1 ]]; then
-        NVIM_APPNAME=$1 nvim
+        chosen_config="$1"
     else
-        local chosen_config=$(
+        chosen_config=$(
             fzf \
                 --cycle \
                 --bind 'tab:toggle-down,btab:toggle-up' \
@@ -137,10 +147,25 @@ use_config() {
                 --border \
                 < "$INSTALLED_CONFIGS_DB"
         )
-        if [[ -n $chosen_config ]]; then
-            NVIM_APPNAME=$chosen_config nvim
+    fi
+
+    if [[ -n $chosen_config ]]; then
+        if [[ $2 == "--use" ]]; then
+            run_nvim_with_config "$chosen_config"
+        elif [[ $2 == "--delete" ]]; then
+            delete_nvim_config "$chosen_config"
+        else
+            error "INTERNAL: you messed up"
         fi
     fi
+}
+
+choose_and_delete_config() {
+    use_or_delete_config "$1" --delete
+}
+
+choose_and_use_config() {
+    use_or_delete_config "$1" --use
 }
 
 update_ncm() {
@@ -163,6 +188,9 @@ update_installed_configs() {
 }
 
 main() {
+    ensure_installed nvim
+    ensure_installed fzf
+
     [[ -f $INSTALLED_CONFIGS_DB ]] || touch "$INSTALLED_CONFIGS_DB"
 
     if [ -n "$1" ]; then
@@ -174,10 +202,10 @@ main() {
             add_config "$2"
 
         elif [[ $1 == "del" ]] || [[ $1 == "d" ]] || [[ $1 == "rm" ]]; then
-            delete_config "$2"
+            choose_and_delete_config "$2"
 
         elif [[ $1 == "use" ]] || [[ $1 == "u" ]]; then
-            use_config "$2"
+            choose_and_use_config "$2"
 
         elif [[ $1 == "list" ]] || [[ $1 == "l" ]] || [[ $1 == "ls" ]]; then
             print_configs
@@ -193,7 +221,7 @@ main() {
         fi
 
     else
-        use_config
+        choose_and_use_config
     fi
 }
 
