@@ -68,7 +68,7 @@ https://user-images.githubusercontent.com/84108846/230238465-014f99d5-7c6e-4c00-
 ## Uninstall
 
 ```
-bash <(curl -s https://raw.githubusercontent.com/trimclain/ncm/main/uninstall.sh)
+curl -fsSL https://raw.githubusercontent.com/trimclain/ncm/main/uninstall.sh | bash
 ```
 
 ## Credit
