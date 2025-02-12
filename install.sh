@@ -9,6 +9,8 @@ main() {
 
     local NCM_DIR="$HOME/.local/share/ncm"
     # TODO: allow to pass in a custom directory (in $PATH)
+    # since this will be used by uninstall.sh, it should be a exported global
+    # variable in the SHELL config
     local LOCAL_BIN="$HOME/.local/bin/"
 
     # don't allow any arguments for now
@@ -16,13 +18,6 @@ main() {
         echo -e "${RED}Error: unknown argument \"$1\"${RESET}"
         return 1
     fi
-
-    # TODO: this doesn't work when using curl
-    # check if $LOCAL_BIN is in $PATH
-    # if [[ ! ":$PATH:" == *":$LOCAL_BIN:"* ]]; then
-    #     echo -e "${RED}Error: $LOCAL_BIN not in \$PATH${RESET}"
-    #     return 1
-    # fi
 
     # check if NCM_DIR already exists
     if [[ -d "$NCM_DIR" ]]; then
