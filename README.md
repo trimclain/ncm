@@ -54,6 +54,11 @@ git clone --depth=1 https://github.com/LazyVim/starter ~/.config/LazyVim && ncm 
 git clone --depth=1 https://github.com/NvChad/NvChad ~/.config/NvChad && ncm add NvChad
 ```
 
+- Space Vim
+```
+git clone --depth=1 https://github.com/SpaceVim/SpaceVim ~/.config/SpaceVim && ncm add SpaceVim
+```
+
 
 ## Demo
 
@@ -66,6 +71,6 @@ https://user-images.githubusercontent.com/84108846/230238465-014f99d5-7c6e-4c00-
 bash <(curl -s https://raw.githubusercontent.com/trimclain/ncm/main/uninstall.sh)
 ```
 
-## Inspiration
+## Credit
 
-Great [video](https://www.youtube.com/watch?v=LkHjJlSgKZY) by Elijah Manor
+Thanks to a great [video](https://www.youtube.com/watch?v=LkHjJlSgKZY) by Elijah Manor for the inspiration.
