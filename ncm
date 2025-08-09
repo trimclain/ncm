@@ -15,7 +15,8 @@
 readonly VERSION="v0.1.0"
 
 readonly CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
-readonly INSTALLED_CONFIGS_DB="${XDG_DATA_HOME:-$HOME/.local/share}/ncm/nvim_configs"
+readonly NCM_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/ncm"
+readonly INSTALLED_CONFIGS_DB="$NCM_DIR/configlist"
 
 readonly BLUE="\033[1;34m"
 readonly GREEN="\033[1;32m"
@@ -67,6 +68,7 @@ print_configs() {
 }
 
 add_config() {
+    # TODO: add support for URLs
     [[ -z $1 ]] && error "No config given"
     [[ -d $1 ]] || error "$1 is not a directory"
 
@@ -185,7 +187,8 @@ main() {
     ensure_installed nvim
     ensure_installed fzf
 
-    # TODO: touch? and also mkdir -p is missing for required dir
+    mkdir -p "$CONFIG_DIR"
+    mkdir -p "$NCM_DIR"
     [[ -f $INSTALLED_CONFIGS_DB ]] || touch "$INSTALLED_CONFIGS_DB"
 
     local cmd="$1"
@@ -197,6 +200,8 @@ main() {
         "use" | "u") choose_and_use_config "$2" && exit 0 ;;
         "list" | "l" | "ls") print_configs && exit 0 ;;
         "update") update_installed_configs && exit 0 ;;
+        # TODO:
+        # "uninstall") remove_installed_configs && exit 0 ;;
         "") choose_and_use_config && exit 0 ;;
         *) error "Unknown command: $cmd" ;;
     esac
