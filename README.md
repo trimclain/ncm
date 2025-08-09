@@ -37,26 +37,21 @@ There are several option available with NCM:
 
 ## Popular Configs
 
-- AstroNvim
-```
-git clone --depth=1 https://github.com/AstroNvim/AstroNvim ~/.config/AstroNvim && ncm add AstroNvim
-```
-- CosmicNvim
-```
-git clone --depth=1 https://github.com/CosmicNvim/CosmicNvim ~/.config/CosmicNvim && ncm add CosmicNvim
-```
 - LazyVim
 ```
-git clone --depth=1 https://github.com/LazyVim/starter ~/.config/LazyVim && ncm add LazyVim
+ncm add https://github.com/LazyVim/starter
 ```
 - NvChad
 ```
-git clone --depth=1 https://github.com/NvChad/NvChad ~/.config/NvChad && ncm add NvChad
+ncm add git clone --depth=1 https://github.com/NvChad/starter
 ```
-
-- SpaceVim
+- AstroNvim
 ```
-git clone --depth=1 https://github.com/SpaceVim/SpaceVim ~/.config/SpaceVim && ncm add SpaceVim
+ncm add git clone --depth=1 https://github.com/AstroNvim/template
+```
+- CosmicNvim
+```
+ncm add git clone --depth=1 https://github.com/CosmicNvim/CosmicNvim
 ```
 
 
