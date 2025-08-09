@@ -1,46 +1,61 @@
 #!/usr/bin/env bash
 
-main() {
-    # Colors
-    local BLUE="\033[1;34m"
-    local GREEN="\033[1;32m"
-    local RED="\e[1;31m"
-    local RESET="\033[0m"
+# shellcheck disable=SC2155
 
-    local NCM_DIR="$HOME/.local/share/ncm"
+main() {
     # TODO: allow to pass in a custom directory (in $PATH)
     # since this will be used by uninstall.sh, it should be a exported global
     # variable in the SHELL config
-    local LOCAL_BIN="$HOME/.local/bin/"
+    readonly DEST="$HOME/.local/bin"
+    readonly NCMLOC="$DEST/ncm"
 
-    # don't allow any arguments for now
-    if [[ -n $1 ]]; then
-        echo -e "${RED}Error: unknown argument \"$1\"${RESET}"
-        return 1
+    if command -v tput > /dev/null; then
+        readonly GREEN=$(tput setaf 2)
+        readonly RESET=$(tput sgr0)
     fi
 
-    # check if NCM_DIR already exists
-    if [[ -d "$NCM_DIR" ]]; then
-        echo "NCM is already installed in \"$NCM_DIR\"!"
-        read -n1 -rp "Do you want to reinstall? [y/N] " res
-        echo ""
-        if [[ $res == "n" ]] || [[ $res == "N" ]]; then
-            echo -e "${GREEN}Skipped!${RESET}"
-            return 0
-        fi
-        echo -n -e "${BLUE}Reinstalling NCM... ${RESET}"
-        rm -rf "$NCM_DIR"
+    SILENT='false'
+    TAG='main'
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -s | --silent) readonly SILENT='true' ;;
+            -t | --tag)
+                if [[ -n "$2" ]] && [[ "$2" != -* ]]; then
+                    readonly TAG="$2"
+                    shift
+                else
+                    echo "Option --tag requires an argument"
+                    exit 1
+                fi
+                ;;
+            --tag=?*)
+                readonly TAG="${1#*=}"
+                ;;
+            *) echo "Invalid argument: $1" && exit 1 ;;
+        esac
+        shift
+    done
+
+    if [[ "$TAG" != "main" && ! "$TAG" =~ ^v0\.[1-9]\.[0-9]+$ ]]; then
+        echo "Tag $TAG does not exist."
+        exit 1
+    fi
+
+    [[ "$SILENT" == "true" ]] || echo "Installing ncm..."
+
+    mkdir -p "$DEST"
+
+    if [[ "$SILENT" == "true" ]]; then
+        curl -fsSL# "https://raw.githubusercontent.com/trimclain/ncm/$TAG/ncm" --output ncm.tmp
     else
-        echo -n -e "${BLUE}Installing NCM... ${RESET}"
+        curl -fL# "https://raw.githubusercontent.com/trimclain/ncm/$TAG/ncm" --output ncm.tmp
     fi
 
-    git clone https://github.com/trimclain/ncm.git "$NCM_DIR" > /dev/null 2>&1
+    mv -f ncm.tmp "$NCMLOC"
+    chmod 755 "$NCMLOC"
 
-    rm -f "$LOCAL_BIN/ncm"
-    # Symlink ncm to ~/.local/bin/
-    ln -s "$NCM_DIR/ncm" "$LOCAL_BIN/ncm"
-
-    echo -e "${GREEN}Done${RESET}"
+    [[ "$SILENT" == "true" ]] || echo "${GREEN}Installation finished${RESET}"
 }
 
 main "$@"
