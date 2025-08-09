@@ -79,19 +79,36 @@ is_url() {
 
 add_config() {
     [[ -z $1 ]] && error "No config given"
-    # TODO: add support for URLs
-    [[ -d $1 ]] || error "$1 is not a directory"
 
-    local confname=$(basename "$1")
+    if ! is_url "$1" && [[ ! -d "$1" ]]; then
+        error "$1 isn't a url or a directory"
+    fi
+
+    local confname
+    if is_url "$1"; then
+        # https://github.com/LazyVim/starter -> LazyVim
+        confname=$(echo "1" | sed -E 's|https?://[^/]+/([^/]+).*|\1|')
+    elif [[ -d "$1" ]]; then
+        confname=$(basename "$1")
+    fi
+
     if grep -qx "$confname" "$INSTALLED_CONFIGS_DB"; then
         error "Config $confname is already in the database"
     fi
 
     # config needs to be in $CONFIG_DIR for $NVIM_APPNAME to work
     if [[ ! -d "$CONFIG_DIR/$confname" ]]; then
-        echo -n "Copying $1 to ~/.config/...   "
-        cp -r "$1" ~/.config/
-        confirm "Done"
+        echo -n "Installing $1 ...   "
+        if is_url "$1"; then
+            if git clone --depth 1 "$1" "$CONFIG_DIR/$confname" &> /dev/null; then
+                confirm "Done"
+            else
+                echo -e "\e[1A\e[K❌ Failed to clone $1"
+                exit 1
+            fi
+        elif [[ -d "$1" ]]; then
+            cp -r "$1" "$CONFIG_DIR/$confname" && confirm "✅ Done"
+        fi
     fi
 
     echo -n "Adding $confname to the database...      "
@@ -144,7 +161,7 @@ remove_installed_configs() {
         if [ -d "$line" ]; then
             delete_nvim_config "$line"
         else
-            alert "Warning: '$line' does not exist. In future please use 'ncm del' to delete configs."
+            alert "❕ Warning: '$line' does not exist. In future please use 'ncm del' to delete configs."
             forgotten_lines+=("$line")
         fi
     done < "$INSTALLED_CONFIGS_DB"
