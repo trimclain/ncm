@@ -25,13 +25,14 @@ There are several option available with NCM:
 | Option                                           | Description                                                         |
 | ------------------------------------------------ | ------------------------------------------------------------------- |
 | `h, help, --help`                                | Show the help message                                               |
+| `v, version, -v`                                 | Print the current version of NCM                                    |
 | `a, add <config>`                                | Add a config directory to NCM                                       |
 | `u, use`                                         | Choose a config to launch neovim with                               |
 | `u, use [config]`                                | Launch neovim with given config name                                |
 | `d, del, rm <config>`                            | Delete a config from NCM and delete all it's traces from the system |
 | `l, list, ls`                                    | List installed configs                                              |
 | `update`                                         | Update all installed configs (only git repos with remote)           |
-| `version, -V`                                    | Print the current version of NCM                                    |
+| `uninstall`                                      | Remove all installed configs                                        |
 
 
 ## Popular Configs
