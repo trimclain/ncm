@@ -12,9 +12,10 @@
 # "Use 'pushd ... || exit' or 'pushd ... || exit' in case pushd fails":
 #  https://www.shellcheck.net/wiki/SC2164
 
-readonly NCM_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/ncm"
+readonly VERSION="v0.1.0"
+
 readonly CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
-readonly INSTALLED_CONFIGS_DB="$NCM_DIR/.nvim_configs"
+readonly INSTALLED_CONFIGS_DB="${XDG_DATA_HOME:-$HOME/.local/share}/ncm/nvim_configs"
 
 readonly BLUE="\033[1;34m"
 readonly GREEN="\033[1;32m"
@@ -53,8 +54,7 @@ COMMANDS:
     u, use      Start neovim with a config
     d, del      Delete config
     l, list     List installed configs
-    update      Update ncm
-    update all  Update ncm and installed configs"
+    update      Update installed configs"
 }
 
 print_configs() {
@@ -168,12 +168,6 @@ choose_and_use_config() {
     use_or_delete_config "$1" --use
 }
 
-update_ncm() {
-    echo -n -e "${BLUE}Updating ncm... ${RESET}"
-    git -C "$NCM_DIR" pull &> /dev/null
-    confirm "Done"
-}
-
 update_installed_configs() {
     # || part ensures the loop processes the last line,
     # even if it doesn't end with a newline
@@ -191,38 +185,21 @@ main() {
     ensure_installed nvim
     ensure_installed fzf
 
+    # TODO: touch? and also mkdir -p is missing for required dir
     [[ -f $INSTALLED_CONFIGS_DB ]] || touch "$INSTALLED_CONFIGS_DB"
 
-    if [ -n "$1" ]; then
-
-        if [[ $1 == "help" ]] || [[ $1 == "h" ]] || [[ $1 == "--help" ]]; then
-            display_help
-
-        elif [[ $1 == "add" ]] || [[ $1 == "a" ]]; then
-            add_config "$2"
-
-        elif [[ $1 == "del" ]] || [[ $1 == "d" ]] || [[ $1 == "rm" ]]; then
-            choose_and_delete_config "$2"
-
-        elif [[ $1 == "use" ]] || [[ $1 == "u" ]]; then
-            choose_and_use_config "$2"
-
-        elif [[ $1 == "list" ]] || [[ $1 == "l" ]] || [[ $1 == "ls" ]]; then
-            print_configs
-
-        elif [[ $1 == "update" ]]; then
-            update_ncm
-            if [[ $2 == "all" ]]; then
-                update_installed_configs
-            fi
-
-        else
-            error "unknown command"
-        fi
-
-    else
-        choose_and_use_config
-    fi
+    local cmd="$1"
+    case $cmd in
+        "help" | "h" | "--help" | "-h") display_help && exit 0 ;;
+        "version" | "v" | "--version" | "-v" | "-V") echo "ncm $VERSION" && exit 0 ;;
+        "add" | "a") add_config "$2" && exit 0 ;;
+        "del" | "d" | "rm") choose_and_delete_config "$2" && exit 0 ;;
+        "use" | "u") choose_and_use_config "$2" && exit 0 ;;
+        "list" | "l" | "ls") print_configs && exit 0 ;;
+        "update") update_installed_configs && exit 0 ;;
+        "") choose_and_use_config && exit 0 ;;
+        *) error "Unknown command: $cmd" ;;
+    esac
 }
 
 main "$@"
