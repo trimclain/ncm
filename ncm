@@ -51,11 +51,13 @@ display_help() {
 
 COMMANDS:
     h, help     Show this help message
+    v, version  Print current ncm version
     a, add      Add new config
     u, use      Start neovim with a config
     d, del      Delete config
     l, list     List installed configs
-    update      Update installed configs"
+    update      Update installed configs
+    uninstall   Remove installed configs"
 }
 
 print_configs() {
@@ -67,9 +69,17 @@ print_configs() {
     fi
 }
 
+is_url() {
+    if [[ "$1" == "http://"* || "$1" == "https://"* ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 add_config() {
-    # TODO: add support for URLs
     [[ -z $1 ]] && error "No config given"
+    # TODO: add support for URLs
     [[ -d $1 ]] || error "$1 is not a directory"
 
     local confname=$(basename "$1")
@@ -114,6 +124,34 @@ delete_nvim_config() {
     echo -n "Deleting $1 from the list... "
     sed -i "/$1/d" "$INSTALLED_CONFIGS_DB"
     confirm "Done"
+}
+
+remove_installed_configs() {
+    if [[ ! -s $INSTALLED_CONFIGS_DB ]]; then
+        error "Neovim configs database is empty"
+    fi
+
+    # Prompt for confirmation before deletion
+    read -p "Are you sure you want to delete all Neovim Configs installed with ncm? (y/N) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Aborting..."
+        return
+    fi
+
+    local forgotten_lines=()
+    while IFS= read -r line; do
+        if [ -d "$line" ]; then
+            delete_nvim_config "$line"
+        else
+            alert "Warning: '$line' does not exist. In future please use 'ncm del' to delete configs."
+            forgotten_lines+=("$line")
+        fi
+    done < "$INSTALLED_CONFIGS_DB"
+
+    for line in "${forgotten_lines[@]}"; do
+        sed -i "/$line/d" "$INSTALLED_CONFIGS_DB"
+    done
 }
 
 ##################################################
@@ -200,8 +238,7 @@ main() {
         "use" | "u") choose_and_use_config "$2" && exit 0 ;;
         "list" | "l" | "ls") print_configs && exit 0 ;;
         "update") update_installed_configs && exit 0 ;;
-        # TODO:
-        # "uninstall") remove_installed_configs && exit 0 ;;
+        "uninstall") remove_installed_configs && exit 0 ;;
         "") choose_and_use_config && exit 0 ;;
         *) error "Unknown command: $cmd" ;;
     esac
