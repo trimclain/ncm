@@ -30,8 +30,7 @@ There are several option available with NCM:
 | `u, use [config]`                                | Launch neovim with given config name                                |
 | `d, del, rm <config>`                            | Delete a config from NCM and delete all it's traces from the system |
 | `l, list, ls`                                    | List installed configs                                              |
-| `update`                                         | Update NCM                                                          |
-| `update all`                                     | Update NCM and all installed configs (only git repos with remote)   |
+| `update`                                         | Update all installed configs (only git repos with remote)           |
 | `version, -V`                                    | Print the current version of NCM                                    |
 
 
@@ -54,7 +53,7 @@ git clone --depth=1 https://github.com/LazyVim/starter ~/.config/LazyVim && ncm 
 git clone --depth=1 https://github.com/NvChad/NvChad ~/.config/NvChad && ncm add NvChad
 ```
 
-- Space Vim
+- SpaceVim
 ```
 git clone --depth=1 https://github.com/SpaceVim/SpaceVim ~/.config/SpaceVim && ncm add SpaceVim
 ```
@@ -64,11 +63,11 @@ git clone --depth=1 https://github.com/SpaceVim/SpaceVim ~/.config/SpaceVim && n
 
 https://user-images.githubusercontent.com/84108846/230238465-014f99d5-7c6e-4c00-a691-f4f870b83865.mp4
 
+## How to uninstall
 
-## Uninstall
-
+Run the following
 ```
-curl -fsSL https://raw.githubusercontent.com/trimclain/ncm/main/uninstall.sh | bash
+rm -rf ~/.local/bin/ncm ~/.local/share/ncm
 ```
 
 ## Credit
