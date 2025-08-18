@@ -52,7 +52,7 @@ display_help() {
 COMMANDS:
     h, help     Show this help message
     v, version  Print current ncm version
-    a, add      Add new config
+    a, add      Add new config (dir or url)
     u, use      Start neovim with a config
     d, del      Delete config
     l, list     List installed configs
@@ -87,7 +87,7 @@ add_config() {
     local confname
     if is_url "$1"; then
         # https://github.com/LazyVim/starter -> LazyVim
-        confname=$(echo "1" | sed -E 's|https?://[^/]+/([^/]+).*|\1|')
+        confname=$(echo "$1" | sed -E 's|https?://[^/]+/([^/]+).*|\1|')
     elif [[ -d "$1" ]]; then
         confname=$(basename "$1")
     fi
