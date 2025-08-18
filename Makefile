@@ -45,11 +45,11 @@ retest: ## Attach to existing ncmtester container interactively
 		echo 'Container "ncmtester" not found. Create it with `make test`.'; \
 	fi
 
-cp: ## Copy ncm to existing running container
-	@if [[ $$(docker ps | grep ncmtester) ]]; then \
+cp: ## Copy ncm to existing container
+	@if [[ $$(docker ps -a | grep ncmtester) ]]; then \
 		docker cp ./ncm ncmtester:/home/tester/.local/bin/ncm; \
 	else \
-		echo 'Container "ncmtester" is not running. Start it with `make test` or `make retest`.'; \
+		echo 'Container "ncmtester" not found. Create it with `make test`.'; \
 	fi
 
 
