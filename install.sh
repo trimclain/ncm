@@ -3,9 +3,6 @@
 # shellcheck disable=SC2155
 
 main() {
-    # TODO: allow to pass in a custom directory (in $PATH)
-    # since this will be used by uninstall.sh, it should be a exported global
-    # variable in the SHELL config
     readonly DEST="$HOME/.local/bin"
     readonly NCMLOC="$DEST/ncm"
 
