@@ -27,6 +27,7 @@ There are several option available with NCM:
 | `h, help, --help`                                | Show the help message                                               |
 | `v, version, -v`                                 | Print the current version of NCM                                    |
 | `a, add <config>`                                | Add a config directory to NCM                                       |
+| `a, add <url>`                                   | Clone a config repository and add it to NCM                       |
 | `u, use`                                         | Choose a config to launch neovim with                               |
 | `u, use [config]`                                | Launch neovim with given config name                                |
 | `d, del, rm <config>`                            | Delete a config from NCM and delete all it's traces from the system |
@@ -43,15 +44,15 @@ ncm add https://github.com/LazyVim/starter
 ```
 - NvChad
 ```
-ncm add git clone --depth=1 https://github.com/NvChad/starter
+ncm add https://github.com/NvChad/starter
 ```
 - AstroNvim
 ```
-ncm add git clone --depth=1 https://github.com/AstroNvim/template
+ncm add https://github.com/AstroNvim/template
 ```
 - CosmicNvim
 ```
-ncm add git clone --depth=1 https://github.com/CosmicNvim/CosmicNvim
+ncm add https://github.com/CosmicNvim/CosmicNvim
 ```
 
 
@@ -61,7 +62,11 @@ https://user-images.githubusercontent.com/84108846/230238465-014f99d5-7c6e-4c00-
 
 ## How to uninstall
 
-Run the following
+1. Uninstall all configs
+```
+ncm uninstall
+```
+2. Remove ncm
 ```
 rm -rf ~/.local/bin/ncm ~/.local/share/ncm
 ```
