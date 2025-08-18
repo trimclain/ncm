@@ -149,24 +149,29 @@ remove_installed_configs() {
     fi
 
     # Prompt for confirmation before deletion
-    read -p "Are you sure you want to delete all Neovim Configs installed with ncm? (y/N) " -n 1 -r
+    read -p "Are you sure you want to delete ALL Neovim Configs installed with ncm? (y/N) " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo "Aborting..."
         return
     fi
 
+    local existing_lines=()
     local forgotten_lines=()
     while IFS= read -r line; do
-        if [ -d "$line" ]; then
-            delete_nvim_config "$line"
+        if [ -d "$CONFIG_DIR/$line" ]; then
+            existing_lines+=("$line")
         else
-            alert "❕ Warning: '$line' does not exist. In future please use 'ncm del' to delete configs."
             forgotten_lines+=("$line")
         fi
     done < "$INSTALLED_CONFIGS_DB"
 
+    for line in "${existing_lines[@]}"; do
+        delete_nvim_config "$line"
+    done
+
     for line in "${forgotten_lines[@]}"; do
+        alert "❕ Warning: '$line' does not exist. In future use 'ncm del' to delete configs."
         sed -i "/$line/d" "$INSTALLED_CONFIGS_DB"
     done
 }
