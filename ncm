@@ -202,7 +202,7 @@ use_or_delete_config() {
         chosen_config=$(
             fzf \
                 --cycle \
-                --bind 'tab:toggle-down,btab:toggle-up' \
+                --bind 'tab:down,btab:up' \
                 --prompt "Use: " \
                 --height=25% \
                 --layout=reverse \
