@@ -16,6 +16,8 @@ readonly VERSION="v0.1.0"
 
 readonly CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
 readonly NCM_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/ncm"
+# TODO: implement
+# readonly LAST_USED_CONFIG="$NCM_DIR/recent"
 readonly INSTALLED_CONFIGS_DB="$NCM_DIR/configlist"
 
 readonly BLUE="\033[1;34m"
@@ -191,6 +193,7 @@ use_or_delete_config() {
     fi
 
     if [[ -n $1 ]] && ! grep -qx "$1" "$INSTALLED_CONFIGS_DB"; then
+        # TODO: accept a filename
         error "Config $1 is not in the database"
     fi
 
@@ -213,6 +216,7 @@ use_or_delete_config() {
 
     if [[ -n $chosen_config ]]; then
         if [[ $2 == "--use" ]]; then
+            # TODO: save chosen config to $LAST_USED_CONFIG
             run_nvim_with_config "$chosen_config"
         elif [[ $2 == "--delete" ]]; then
             delete_nvim_config "$chosen_config"
